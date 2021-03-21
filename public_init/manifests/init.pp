@@ -9,7 +9,7 @@ class public_init() {
         '/etc/sudoers':
             owner => root, group => root, mode => '0440',
             ensure  => present,
-            content => template('etc-sudoers.erb'),
+            content => template('public_init/etc-sudoers.erb'),
             ;
     }
 }
