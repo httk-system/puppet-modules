@@ -4,7 +4,7 @@ class public_init() {
         '/root/control/puppet-update-private-modules':
             owner => root, group => root, mode => '0644',
             ensure  => present,
-            content => template('root-control-puppet-update-public-modules.erb'),
+            content => template('public_init/root-control-puppet-update-public-modules.erb'),
             ;
         '/etc/sudoers':
             owner => root, group => root, mode => '0440',
