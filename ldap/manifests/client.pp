@@ -14,7 +14,7 @@ class ldap::client (
 
     file {
        '/root/bin/ldap_client_install.sh':
-       content => template('nscmodules/ldap/root-bin-ldap_client_install.sh.erb'),
+       content => template('ldap/root-bin-ldap_client_install.sh.erb'),
        ensure => present,
        owner => 'root', group => 'root', mode => '0700',
     }
