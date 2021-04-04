@@ -1,0 +1,204 @@
+#!/bin/bash
+# Inspired by: http://www.tecmint.com/setup-ldap-server-and-configure-client-authentication/
+
+set -o xtrace
+
+echo "Running: ldap_server_install"
+
+cat /dev/urandom| tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?='|fold -w 32| head -n 1 | tr -d '\n' > /root/secrets/ldapserver
+chmod go-rwx /root/secrets/ldapserver
+
+#cat /dev/urandom| tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?='|fold -w 32| head -n 1 | tr -d '\n' > /root/secrets/ldapserver-monitor
+#chmod go-rwx /root/secrets/ldapserver-monitor
+
+HASHPASS=$(slappasswd -T /root/secrets/ldapserver)
+#HASHPASSMONITOR=$(slappasswd -T /root/secrets/ldapserver-monitor)
+OLCDN=$(sudo ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn)
+# OLCDN=dn: olcDatabase={1}mdb,cn=config
+DN=$(ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcRootDN | sed -n 's/^olcRootDN: cn=[^,]*,\(.*\)$/\1/p')
+if [ -z "$OLCDN" -o -z "$DN" ]; then
+   echo "OLCDN or DC unexpected"
+   exit 1
+fi
+echo "$DN" > /root/secrets/ldapserver-dn
+
+#ldapmodify -Q -Y EXTERNAL -H ldapi:/// << EOF
+#$OLCDN
+#changetype: modify
+#replace: olcRootDN
+#olcRootDN: cn=admin,dc=local
+#EOF
+
+#ldapadd -H ldapi:/// -f /tmp/ldaprootpasswd.ldif 
+ldapmodify -Y EXTERNAL -H ldapi:/// <<EOF
+$OLCDN
+changetype: modify
+replace: olcRootPW
+olcRootPW: $HASHPASS
+EOF
+
+for def in cosine.ldif nis.ldif inetorgperson.ldif; do 
+    ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/$def; 
+done
+
+#ldapadd -y /root/secrets/ldapserver -x -D "cn=admin,dc=home" -W -H ldapi:/// <<EOF
+#dn: cn=monitor,$DN
+#objectClass: simpleSecurityObject
+#objectClass: organizationalRole
+#cn: monitor
+#description: LDAP monitor
+#userPassword: $HASHPASSMONITOR
+#EOF
+
+#ldapmodify -y /root/secrets/ldapserver -x -D "cn=admin,dc=home" -W -H ldapi:/// <<EOF
+#$OLCDN
+#changetype: modify
+#replace: olcAccess
+#olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
+#  read by dn.base="cn=admin,dc=local" read by * none
+#EOF
+
+#ldapmodify -y /root/secrets/ldapserver -x -D "cn=admin,dc=home" -W -H ldapi:/// <<EOF
+#$OLCDN
+#changetype: modify
+#replace: olcSuffix
+#olcSuffix: dc=local
+#EOF
+
+#dn: $OLCDN
+#changetype: modify
+#replace: olcRootDN
+#olcRootDN: cn=admin,dc=local
+
+dn: $OLCDN
+changetype: modify
+add: olcRootPW
+olcRootPW: $HASHPASS
+
+#dn: $OLCDN
+#changetype: modify
+#add: olcAccess
+#olcAccess: {0}to attrs=userPassword,shadowLastChange by
+#  dn="cn=admin,dc=local" write by anonymous auth by self write by * none
+#olcAccess: {1}to dn.base="" by * read
+#olcAccess: {2}to * by dn="cn=admin,dc=local" write by * read
+#EOF
+
+#ldapadd -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
+#dn: $DN
+#objectClass: top
+#objectClass: dcObject
+#objectclass: organization
+#o: local
+#dc: local
+#EOF
+
+#ldapadd -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
+#dn: cn=admin,$DN
+#objectClass: organizationalRole
+#cn: admin
+#description: Directory admin
+#EOF
+
+ldapadd -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
+dn: ou=People,$DN
+objectClass: organizationalUnit
+ou: People
+EOF
+
+ldapadd -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
+dn: ou=Group,$DN
+objectClass: organizationalUnit
+ou: Group
+EOF
+
+
+# DEMO TESTING A USER; 
+cat - <<EODEMO
+
+adduser ldapuser
+LDAPUID=$(cat /etc/passwd | grep ldapuser | awk -F ':' '{print $3}')
+LDAPGID=$(cat /etc/passwd | grep ldapuser | awk -F ':' '{print $4}')
+
+ldapadd -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
+dn: cn=admin,ou=Group,$DN
+objectClass: top
+objectClass: posixGroup
+gidNumber: $LDAPGID
+EOF
+
+ldapadd -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
+dn: uid=ldapuser,ou=People,$DN
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: ldapuser
+uid: ldapuser
+uidNumber: $LDAPUID
+gidNumber: $LDAPGID
+homeDirectory: /home/ldapuser
+userPassword: $HASHPASS
+loginShell: /bin/bash
+gecos: ldapuser
+shadowLastChange: 0
+shadowMax: 0
+shadowWarning: 0
+EOF
+
+# Delete user
+#ldapdelete -x -D cn=admin,dc=local "uid=ldapuser,ou=People,dc=local" -w "tmp_install_password"
+EODEMO
+#authconfig --enableldap --disableldapauth --ldapserver=10.56.10.1 --ldapbasedn="dc=local" --update
+
+
+cat - > /root/control/ldap-adduser <<EOSCRIPT
+#!/bin/bash
+
+DN=$DN
+
+USERNAME=\$1
+LDAPUID=\$2
+LDAPGID=\$3
+
+if [ -z "\$1" -o -z "\$2" -o -z "\$3" ]; then
+   echo "Usage: \$0 username uid gid"
+   exit 1
+fi
+
+HASHPASS=\$(slappasswd)
+
+if [ "\$?" != "0" ]; then
+   echo "Error getting password."
+   exit 1
+fi
+
+ldapadd -x -D "cn=admin,\$DN" -y /root/secrets/ldapserver <<EOF
+dn: cn=admin,ou=Group,\$DN
+objectClass: top
+objectClass: posixGroup
+gidNumber: \$LDAPGID
+EOF
+
+ldapadd -x -D "cn=admin,\$DN" -y /root/secrets/ldapserver <<EOF
+dn: uid=ldapuser,ou=People,\$DN
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: ldapuser
+uid: ldapuser
+uidNumber: \$LDAPUID
+gidNumber: \$LDAPGID
+homeDirectory: /home/ldapuser
+userPassword: \HASHPASS
+loginShell: /bin/bash
+gecos: ldapuser
+shadowLastChange: 0
+shadowMax: 0
+shadowWarning: 0
+EOF
+EOSCRIPT
+
+
+touch /root/flags/ldapserver-installed
