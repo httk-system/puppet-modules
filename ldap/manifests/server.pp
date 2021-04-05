@@ -17,13 +17,13 @@ class ldap::server (
     }
 
     file { '/root/bin/ldap_server_install.sh':
-	content => template('nscmodules/ldap/root-bin-ldap_server_install.sh.erb'),
+	content => template('ldap/root-bin-ldap_server_install.sh.erb'),
 	ensure => present,
 	owner => 'root', group => 'root', mode => '0700',
     }
 
     file { '/root/control/ldap_refresh_users.sh':
-	content => template('nscmodules/ldap/root-bin-ldap_refresh_users.sh.erb'),
+	content => template('ldap/root-bin-ldap_refresh_users.sh.erb'),
 	ensure => present,
 	owner => 'root', group => 'root', mode => '0700',
     }
