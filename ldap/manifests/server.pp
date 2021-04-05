@@ -1,13 +1,12 @@
 class ldap::server (
 ) {
+
+    include ldap::common
   
     package {
 	'slapd':
             ensure => installed,
 	    ;
-	'ldap-utils':
-            ensure => installed,
-	    ;	    
     }
     ~>    
     service {
@@ -18,12 +17,6 @@ class ldap::server (
 
     file { '/root/bin/ldap_server_install.sh':
 	content => template('ldap/root-bin-ldap_server_install.sh.erb'),
-	ensure => present,
-	owner => 'root', group => 'root', mode => '0700',
-    }
-
-    file { '/root/control/ldap_refresh_users.sh':
-	content => template('ldap/root-bin-ldap_refresh_users.sh.erb'),
 	ensure => present,
 	owner => 'root', group => 'root', mode => '0700',
     }

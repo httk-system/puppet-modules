@@ -1,5 +1,8 @@
 class ldap::client (
 ) {
+
+    include ldap::common
+
     package {
        'libnss-ldap':
             ensure => installed,
@@ -7,9 +10,6 @@ class ldap::client (
        'libpam-ldap':
             ensure => installed,
 	    ;
-       'ldap-utils':
-            ensure => installed,
-	    ;	    
     }
 
     file {
