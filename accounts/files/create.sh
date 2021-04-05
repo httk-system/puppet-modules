@@ -6,8 +6,9 @@ DEFAULTGUID=100
 #
 
 NEWNAME=$1
-NEWUID=$2
-NEWGID=$3
+NEWFULLNAME=$2
+NEWUID=$3
+NEWGID=$4
 
 if [ -z "$NEWNAME" ]; then
     echo "Usage: $0 <username> [uid] [gid]"
@@ -42,5 +43,5 @@ find create.d | sort -n | grep -v '.*~$\|.disabled$' | while [ 0 = 0 ]; do
     if [ -e "${LINE}.disabled" ]; then
 	continue
     fi
-    source "$LINE" "$NEWNAME" "$NEWUID" "$NEWGID"
+    source "$LINE" "$NEWNAME" "$NEWFULLNAME" "$NEWUID" "$NEWGID"
 done

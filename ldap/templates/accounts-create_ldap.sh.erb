@@ -1,0 +1,25 @@
+NEWNAME="$1"
+NEWFULLNAME="$2"
+NEWUID="$3"
+NEWGID="$4"
+
+DN=$(cat /root/secrets/ldapserver-dn)
+
+ldapadd -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
+dn: uid=$NEWNAME,ou=People,$DN
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: $NEWNAME
+uid: $NEWNAME
+uidNumber: $NEWUID
+gidNumber: $NEWGID
+homeDirectory: /home/$NEWNAME
+userPassword: !!
+loginShell: /bin/bash
+gecos: $NEWFULLNAME
+shadowLastChange: 18721
+shadowMax: 99999
+shadowWarning: 0
+EOF

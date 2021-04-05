@@ -1,0 +1,8 @@
+DESTROYNAME="$1"
+
+DN=$(cat /root/secrets/ldapserver-dn)
+
+ldapmodify -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
+dn: uid=$DESTROYNAME,ou=People,$DN
+changeType: delete
+EOF

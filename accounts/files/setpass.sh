@@ -1,7 +1,7 @@
 #!/bin/bash
 
-SETNAME=$1
-SETPASS=$2
+SETNAME="$1"
+SETPASS="$2"
 
 if [ -z "$SETNAME" ]; then
     echo "Usage: $0 <username>"
@@ -33,5 +33,5 @@ find setpass.d | sort -n | grep -v '.*~$\|.disabled$' | while [ 0 = 0 ]; do
     if [ -e "${LINE}.disabled" ]; then
 	continue
     fi
-    source "$LINE" "$SETNAME" "$SETUID" "$SETGID" "$SETPASS"
+    source "$LINE" "$SETNAME" "$SETPASS" "$SETUID" "$SETGID" 
 done
