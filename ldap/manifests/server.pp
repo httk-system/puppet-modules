@@ -38,7 +38,7 @@ class ldap::server (
                         Package['slapd'],
 			Package['ldap-utils'],
 			],
-	    creates => '/root/flags/ldapserver-installed',
+	    creates => '/root/flags/ldap_server-installed',
 	    logoutput => true,
     }
     
