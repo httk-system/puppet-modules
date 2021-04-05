@@ -1,4 +1,6 @@
 class ldap::server (
+  $ldap_domain="home",
+  $ldap_org="home",
 ) {
 
     include ldap::common

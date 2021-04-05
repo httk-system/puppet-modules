@@ -1,26 +1,61 @@
 #!/bin/bash
 # Inspired by: http://www.tecmint.com/setup-ldap-server-and-configure-client-authentication/
-
 set -o xtrace
+ 
+LDAP_DOMAIN="<%= @ldap_domain %>"
+LDAP_ORG="<%= @ldap_org %>"
 
 echo "Running: ldap_server_install"
 
+ROOTDN=$(echo "$LDAP_DOMAIN" | sed 's/^/dc=/;s/\./,dc=/g')
+FIRSTROOTDC=$(echo "$LDAP_DOMAIN" | sed "s/\..*//")
+echo "$ROOTDN" > /root/secrets/ldapserver-dn
+
 cat /dev/urandom| tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?='|fold -w 32| head -n 1 | tr -d '\n' > /root/secrets/ldapserver
 chmod go-rwx /root/secrets/ldapserver
-
-#cat /dev/urandom| tr -dc 'a-zA-Z0-9-_!@#$%^&*()_+{}|:<>?='|fold -w 32| head -n 1 | tr -d '\n' > /root/secrets/ldapserver-monitor
-#chmod go-rwx /root/secrets/ldapserver-monitor
-
 HASHPASS=$(slappasswd -T /root/secrets/ldapserver)
-#HASHPASSMONITOR=$(slappasswd -T /root/secrets/ldapserver-monitor)
+
+# Start fresh
+systemctl stop slapd.service
+rm -rf /var/lib/ldap/*
+
+sudo -u openldap slapadd <<EOF
+dn: $ROOTDN
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: $LDAP_ORG
+dc: $FIRSTROOTDC
+structuralObjectClass: organization
+entryUUID: d4a985ea-2a33-103b-8efa-dd8842a68285
+creatorsName: cn=admin,$ROOTDN
+createTimestamp: 20210405082240Z
+entryCSN: 20210405082240.050603Z#000000#000#000000
+modifiersName: cn=admin,$ROOTDN
+modifyTimestamp: 20210405082240Z
+
+dn: cn=admin,$ROOTDN
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword: $HASHPASS
+structuralObjectClass: organizationalRole
+entryUUID: d4aa25cc-2a33-103b-8efb-dd8842a68285
+creatorsName: cn=admin,$ROOTDN
+createTimestamp: 20210405082240Z
+entryCSN: 20210405082240.054778Z#000000#000#000000
+modifiersName: cn=admin,$ROOTDN
+modifyTimestamp: 20210405082240Z
+EOF
+
+systemctl start slapd.service
+
 OLCDN=$(sudo ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn)
-# OLCDN=dn: olcDatabase={1}mdb,cn=config
-DN=$(ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcRootDN | sed -n 's/^olcRootDN: cn=[^,]*,\(.*\)$/\1/p')
-if [ -z "$OLCDN" -o -z "$DN" ]; then
-   echo "OLCDN or DC unexpected"
+if [ -z "$OLCDN" ]; then
+   echo "OLCDN unexpected"
    exit 1
 fi
-echo "$DN" > /root/secrets/ldapserver-dn
 
 #ldapmodify -Q -Y EXTERNAL -H ldapi:/// << EOF
 #$OLCDN
@@ -70,10 +105,10 @@ done
 #replace: olcRootDN
 #olcRootDN: cn=admin,dc=local
 
-dn: $OLCDN
-changetype: modify
-add: olcRootPW
-olcRootPW: $HASHPASS
+#dn: $OLCDN
+#changetype: modify
+#add: olcRootPW
+#olcRootPW: $HASHPASS
 
 #dn: $OLCDN
 #changetype: modify
