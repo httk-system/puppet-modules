@@ -1,7 +1,7 @@
 #!/bin/bash
 
 UIDSTART=5000
-DEFAULTGUID=100
+DEFAULTGID=100
 
 #
 
@@ -10,8 +10,9 @@ NEWFULLNAME=$2
 NEWUID=$3
 NEWGID=$4
 
-if [ -z "$NEWNAME" ]; then
-    echo "Usage: $0 <username> [uid] [gid]"
+if [ -z "$NEWNAME" -o -z "$NEWFULLNAME" ]; then
+    echo "Usage: $0 <username> \"<full name>\" [uid] [gid]"
+    exit 1
 fi
 
 next_uid() {
@@ -28,7 +29,7 @@ next_uid() {
     echo "$CHECKUID"
 }
 
-if [ -z "$UID" ]; then
+if [ -z "$NEWUID" ]; then
     NEWUID=$(next_uid)
 fi
 
@@ -38,8 +39,7 @@ fi
 
 
 cd /root/accounts
-find create.d | sort -n | grep -v '.*~$\|.disabled$' | while [ 0 = 0 ]; do
-    read LINE
+find create.d -type f | sort -n | grep -v '.*~$\|.disabled$' | while read LINE; do
     if [ -e "${LINE}.disabled" ]; then
 	continue
     fi

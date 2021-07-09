@@ -4,20 +4,27 @@ SETNAME="$1"
 SETPASS="$2"
 
 if [ -z "$SETNAME" ]; then
-    echo "Usage: $0 <username>"
+    echo "Usage: $0 <username> [password]"
+    exit 1
 fi
 
 SETUID=$(id -u "$SETNAME")
+if [ "$?" != "0" ];then
+    echo "Could not find user"
+    exit 1
+fi
 SETGID=$(id -g "$SETNAME")
 
 if [ -z "$SETPASS" ]; then
     while [ 0 = 0 ]; do
 	echo -n Password: 
 	read -s SETPASS
-
+	echo
+	
 	echo -n Confirm password: 
 	read -s SETPASSCONF
-
+	echo
+	
 	if [ "$SETPASS" = "$SETPASSCONF" ]; then
 	    break
 	else
@@ -28,8 +35,7 @@ if [ -z "$SETPASS" ]; then
 fi
 
 cd /root/accounts
-find setpass.d | sort -n | grep -v '.*~$\|.disabled$' | while [ 0 = 0 ]; do
-    read LINE
+find setpass.d -type f | sort -n | grep -v '.*~$\|.disabled$' | while read LINE; do
     if [ -e "${LINE}.disabled" ]; then
 	continue
     fi

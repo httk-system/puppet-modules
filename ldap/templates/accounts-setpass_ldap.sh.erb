@@ -5,7 +5,7 @@ SETGID="$4"
 
 DN=$(cat /root/secrets/ldapserver-dn)
 
-HASHPASS=$(echo "$SETPASS" | slappasswd -T /dev/stdin)
+HASHPASS=$(echo -n "$SETPASS" | slappasswd -T /dev/stdin)
 
 ldapmodify -x -D "cn=admin,$DN" -y /root/secrets/ldapserver <<EOF
 dn: uid=$SETNAME,ou=People,$DN

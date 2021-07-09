@@ -2,18 +2,19 @@ class accounts() {
 
     file {
         '/root/accounts':
-	    {ensure => 'directory',owner => 'root',mode => '0700'},
+	    ensure => 'directory',owner => 'root',mode => '0700',
     }
     ->
     file {
-        '/root/accounts':
-	    {ensure => 'directory',owner => 'root',mode => '0700'},
         '/root/accounts/create.d':
-	    {ensure => 'directory',owner => 'root',mode => '0700'},
+	    ensure => 'directory',owner => 'root',mode => '0700',
+	    ;
 	'/root/accounts/destroy.d':
-	    {ensure => 'directory',owner => 'root',mode => '0700'},
+	    ensure => 'directory',owner => 'root',mode => '0700',
+	    ;
 	'/root/accounts/setpass.d':
-	    {ensure => 'directory',owner => 'root',mode => '0700'},
+	    ensure => 'directory',owner => 'root',mode => '0700',
+	    ;
     }
     ->
     file {
