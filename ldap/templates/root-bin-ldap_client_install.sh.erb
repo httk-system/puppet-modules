@@ -5,8 +5,8 @@ set -o xtrace
 cat /etc/nsswitch.conf | awk '/^passwd: /{print $0,"ldap"; next} /^group: /{print $0,"ldap"; next} /^shadow: /{print $0,"ldap"; next} {print}' > /etc/nsswitch.conf.new
 
 # Sanity checking
-PRE=$(wc -l /etc/nsswitch.conf)
-POST=$(wc -l /etc/nsswitch.conf.new)
+PRE=$(wc -l < /etc/nsswitch.conf)
+POST=$(wc -l < /etc/nsswitch.conf.new)
 if [ "$POST" = "0" -o "$POST" != "$PRE" ]; then
    echo "Edits seem to have broken nsswitch.conf"
    exit 1
