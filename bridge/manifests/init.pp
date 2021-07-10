@@ -3,6 +3,12 @@ class bridge (
   $bridge_net_if,
 ) {
 
+    package {
+	'network-manager':
+            ensure => installed,
+	    ;
+    }
+
     file { '/root/bin/bridge_install.sh':
 	content => template('bridge/root-bin-bridge_install.sh.erb'),
 	ensure => present,
@@ -14,6 +20,7 @@ class bridge (
 	    require => [
 			File['/root/bin/bridge_install.sh'],
 			File['/root/flags'],
+			Package['network-manager'],
 			],
 	    creates => '/root/flags/bridge-installed',
 	    logoutput => true,
