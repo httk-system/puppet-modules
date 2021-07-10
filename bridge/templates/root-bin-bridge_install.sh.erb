@@ -5,9 +5,9 @@ set -o xtrace
 IF1="<%= @main_net_if %>"
 IF2="<%= @bridge_net_if %>"
 
-nmcli con add ifname br0 type bridge con-name br0
-nmcli con add type bridge-slave ifname "$IF1" master br0
-nmcli con add type bridge-slave ifname "$IF2" master br0
-nmcli con up br0
+nmcli con add ifname cbr0 type bridge con-name cbr0
+nmcli con add type bridge-slave ifname "$IF1" master cbr0
+nmcli con add type bridge-slave ifname "$IF2" master cbr0
+nmcli con up cbr0
 
 touch /root/flags/bridge-installed
