@@ -1,8 +1,10 @@
 class certbot_apache (
   $certbot_domains,
-  $certbot_email
+  $certbot_email,
   $agree_tos,
   $eff_email,
+  $https_redirect,
+  $notify = undef,
 ) {
     include public_init
 
@@ -16,7 +18,7 @@ class certbot_apache (
     }
 
     file { '/root/bin/certbot_update.sh':
-	content => template('certbot/root-bin-certbot_update.sh.erb'),
+	content => template('certbot_apache/root-bin-certbot_update.sh.erb'),
 	ensure => present,
 	owner => 'root', group => 'root', mode => '0700',
     }
@@ -29,6 +31,7 @@ class certbot_apache (
 			Package['certbot'],
 		        Package['python3-certbot-apache'],
 			],
+            notify => $notify,
 	    logoutput => true,
     }
     
