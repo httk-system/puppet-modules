@@ -18,10 +18,5 @@ class public_init() {
 	    require => File['/root/puppet'],
 	    target => '/etc/puppet/code/local-modules/public',
             ;	    
-        '/etc/sudoers':
-            owner => root, group => root, mode => '0440',
-            ensure  => present,
-            content => template('public_init/etc-sudoers.erb'),
-            ;
     }
 }
