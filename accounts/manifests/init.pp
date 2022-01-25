@@ -1,5 +1,7 @@
 class accounts() {
 
+    include public_init
+
     file {
         '/root/accounts':
 	    ensure => 'directory',owner => 'root',mode => '0700',

@@ -2,6 +2,7 @@ class bridge (
   $main_net_if,
   $bridge_net_if,
 ) {
+    include public_init
 
     package {
 	'network-manager':
