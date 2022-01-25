@@ -24,35 +24,17 @@ class ldap::server (
     }
 
     file {
-        '/root/accounts/create.d/100_create_unix.sh.disabled':
-	  content => '',
-	  ensure => present,
-	  require => File['/root/accounts/create.d'],
-	  owner => 'root', group => 'root', mode => '0700',
-	;
         '/root/accounts/create.d/100_create_ldap.sh':
 	  content => template('ldap/accounts-create_ldap.sh.erb'),
 	  ensure => present,
 	  require => File['/root/accounts/create.d'],
           owner => 'root', group => 'root', mode => '0700',
 	;	
-	'/root/accounts/destroy.d/100_destroy_unix.sh.disabled':
-	  content => '',
-	  ensure => present,
- 	  require => File['/root/accounts/destroy.d'],
-          owner => 'root', group => 'root', mode => '0700',
-	;
         '/root/accounts/destroy.d/100_destroy_ldap.sh':
 	  content => template('ldap/accounts-destroy_ldap.sh.erb'),
 	  ensure => present,
  	  require => File['/root/accounts/destroy.d'],
           owner => 'root', group => 'root', mode => '0700',
-	;
-	'/root/accounts/setpass.d/100_setpass_unix.sh.disabled':
-	  content => '',
-	  ensure => present,
-  	  require => File['/root/accounts/setpass.d'],
-	  owner => 'root', group => 'root', mode => '0700',
 	;
         '/root/accounts/setpass.d/100_setpass_ldap.sh':
 	  content => template('ldap/accounts-setpass_ldap.sh.erb'),
