@@ -6,28 +6,30 @@ set -o xtrace
 <% else %>
 echo "YOU MUST AGREE TO THE LETSENCRYPT TOS TO REQUEST CERTIFICATES (read tos and then set agree_tos=>true)"
 exit 1
-<% end %>]
-
-DOMAINS="<% @certbot_domains.each do |val| -%><%= val %> <% end -%>"
-DOMAINS_TO_REQUEST=""
+<% end %>
 
 # Figure out which of the certificates we want that are missing
-CERTS=$(certbot certificates)
-for domain in $DOMAINS; do
-    CHECK=$(printf "%s" "$CERTS" | grep "$domain")
-    if [ -z "$CHECK" ]; then
-	if [ -z "$DOMAINS_TO_REQUEST" ]; then
-	    DOMAINS_TO_REQUEST="-d $domain"
-	else
-	    DOMAINS_TO_REQUEST="-d $domain $DOMAINS_TO_REQUEST"
-	fi
-    fi
-done
+# DOMAINS="<% @certbot_domains.each do |val| -%><%= val %> <% end -%>"
+# DOMAINS_TO_REQUEST=""
+#CERTS=$(certbot certificates)
+#for domain in $DOMAINS; do
+#    CHECK=$(printf "%s" "$CERTS" | grep "$domain")
+#    if [ -z "$CHECK" ]; then
+#	if [ -z "$DOMAINS_TO_REQUEST" ]; then
+#	    DOMAINS_TO_REQUEST="-d $domain"
+#	else
+#	    DOMAINS_TO_REQUEST="-d $domain $DOMAINS_TO_REQUEST"
+#	fi
+#    fi
+#done
+
+# Let certbot figure out what needs to be done with --keep-until-expiring
+DOMAINS_TO_REQUEST="<% @certbot_domains.each do |val| -%>-d <%= val %> <% end -%>"
 
 # Request the certificates that are missing
-if [ ! -z "$DOMAINS_TO_REQUEST" ]; then
-    echo certbot --apache -m <%= @certbot_email %> <% if @eff_email %>--eff-email<% else %>--no-eff-email<% end %> <% if @https_redirect %>--redirect<% else %>--no-redirect<% end %> $DOMAINS_TO_REQUEST
-fi
+#if [ ! -z "$DOMAINS_TO_REQUEST" ]; then
+certbot --keep-until-expiring --apache -m <%= @certbot_email %> <% if @eff_email %>--eff-email<% else %>--no-eff-email<% end %> <% if @https_redirect %>--redirect<% else %>--no-redirect<% end %> $DOMAINS_TO_REQUEST
+#fi
 
 # Check if any certificates should be renewed
-certbot renew
+# certbot renew
