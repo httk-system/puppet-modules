@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -o xtrace
+
+if [ <% if @agree_tos %>1==1<% else %>1==0<% end %>]; then
+    echo "YOU MUST AGREE TO THE LETSENCRYPT TOS TO REQUEST CERTIFICATES (read tos and then set agree_tos=>true)"
+    exit 1
+fi
+
+DOMAINS="<% @values.each do |val| -%><%= val %> <% end -%>"
+DOMAINS_TO_REQUEST=""
+
+CERTS=$(certbot certificates)
+
+for domain in $DOMAINS; do
+    CHECK=$(printf "%s" "$CERTS" | grep "$domain")
+    if [ -z "$CHECK" ]; then
+	if [ -z "$CERTS" ]; then
+	    CERTS="-d $domain"
+	else
+	    CERTS="-d $domain $CERTS"
+	fi
+    fi
+done
+
+if [ ! -z "$CERTS" ]; then
+    echo certbot --apache -m <%= @certbot_email %> <% if @eff_email %>--eff-email<% else %>--no-eff-email<% end %> $CERTS
+fi
