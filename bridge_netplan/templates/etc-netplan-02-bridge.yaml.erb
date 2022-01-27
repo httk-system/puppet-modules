@@ -1,0 +1,7 @@
+network:
+  bridges:
+    br0:
+      dhcp4: yes
+      interfaces:
+        - <%= @main_net_if %>
+        - <%= @bridge_net_if %>
