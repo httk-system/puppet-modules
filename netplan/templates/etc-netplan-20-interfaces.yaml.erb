@@ -1,0 +1,8 @@
+network:
+  ethernets:
+<% @ifs.each do |key,val| -%>
+    <%= key %>:
+<% val.each do |ikey,ival| -%>
+      <%= ikey %>: <%= ival %>
+<% end -%>
+<% end -%>
