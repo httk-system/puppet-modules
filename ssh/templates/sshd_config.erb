@@ -22,10 +22,10 @@ LogLevel INFO
 # No remote root login
 PermitRootLogin no
 StrictModes yes
-# No remote password login
-<% if @password_auth == true %>
+<% if @password_auth %>
 PasswordAuthentication yes
 <% else %>
+# Block remote password login
 PasswordAuthentication no
 <% end %>
 

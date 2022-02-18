@@ -2,6 +2,8 @@ class ssh::server(
   $port = 22,
   $password_auth = false,
 ){
+    notice("HUH $password_auth")
+
     package { 'ssh':
         ensure => present,
     } ->
@@ -10,7 +12,7 @@ class ssh::server(
         owner   => 'root',
         group   => 'root',
         mode    => '0600',
-        content => template( 'profiles/ssh/sshd_config.erb'),
+        content => template( 'ssh/sshd_config.erb'),
     } ~>
     service { 'ssh':
         ensure     => running,
