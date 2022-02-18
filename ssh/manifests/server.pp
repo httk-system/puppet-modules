@@ -1,5 +1,6 @@
 class ssh::server(
   $port = 22,
+  $password_auth = false,
 ){
     package { 'ssh':
         ensure => present,

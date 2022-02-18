@@ -23,7 +23,11 @@ LogLevel INFO
 PermitRootLogin no
 StrictModes yes
 # No remote password login
+<% if @password_auth == true %>
+PasswordAuthentication yes
+<% else %>
 PasswordAuthentication no
+<% end %>
 
 RSAAuthentication yes
 PubkeyAuthentication yes
