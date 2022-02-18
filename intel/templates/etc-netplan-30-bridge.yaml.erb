@@ -1,8 +1,0 @@
-network:
-  bridges:
-    <%= @name %>:
-      dhcp4: yes
-      interfaces:
-<% @bridge_ifs.each do |item| -%>
-        - <%= item %>
-<% end -%>
