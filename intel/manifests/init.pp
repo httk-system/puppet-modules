@@ -1,4 +1,5 @@
 class intel (
+  $fabric="shm"
 ) {
     include public_init
 
@@ -67,7 +68,16 @@ class intel (
       'intel-hpckit',
     ]:
       ensure => 'present'
-    }    
+    }
+
+    file { '/etc/profile.d/intel.sh':
+        ensure  => present,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0664',
+        content => template( 'intel/etc-profile.d-intel.sh.erb'),
+    }
+
 }
 
 
