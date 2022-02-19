@@ -2,8 +2,6 @@ class ssh::server(
   $port = 22,
   $password_auth = false,
 ){
-    notice("HUH $password_auth")
-
     package { 'ssh':
         ensure => present,
     } ->
