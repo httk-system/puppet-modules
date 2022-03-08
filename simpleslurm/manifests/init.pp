@@ -2,6 +2,8 @@ class simpleslurm (
 ) {
     include public_init
 
+    $nodename=$facts['hostname']
+
     package { [
       'slurm-wlm',
     ]:
@@ -13,7 +15,7 @@ class simpleslurm (
         owner   => 'root',
         group   => 'root',
         mode    => '0664',
-        content => template( 'slurm/etc-slurm-llnl-slurm.conf'),
+        content => template( 'simpleslurm/etc-slurm-llnl-slurm.conf.erb'),
 	notify => [ Service['slurmctld'], Service['slurmd'] ],
     }
 

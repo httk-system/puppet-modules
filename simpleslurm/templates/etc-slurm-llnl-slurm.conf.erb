@@ -46,5 +46,5 @@ SlurmdLogFile=/var/log/slurm-llnl/slurmd.log
 #
 #
 # COMPUTE NODES
-NodeName=labb NodeAddr=127.0.0.1 CPUs=16 State=UNKNOWN
-PartitionName=labb Nodes=labb Default=YES
+NodeName=<%= @nodename %> NodeAddr=127.0.0.1 CPUs=16 State=UNKNOWN
+PartitionName=<%= @nodename %> Nodes=<%= @nodename %> Default=YES
