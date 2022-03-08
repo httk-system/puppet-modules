@@ -28,7 +28,7 @@ class ssh::server(
         action => 'accept',
     }
 
-    if $failtoban {
+    if $fail2ban {
 
       class { 'fail2ban':
         package_ensure => 'latest',
