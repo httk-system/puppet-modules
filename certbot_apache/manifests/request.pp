@@ -31,7 +31,7 @@ define certbot_apache::request (
 			Package['certbot'],
 		        Package['python3-certbot-apache'],
 			],
-	    command => "certbot --keep-until-expiring --apache -m $certbot_email $eff_email_arg $redirect_arg -d $domain_args",
+	    command => "certbot -n --keep-until-expiring --apache -m $certbot_email $eff_email_arg $redirect_arg -d $domain_args",
 	    provider => shell,
             notify => $notify,
 	    logoutput => true,

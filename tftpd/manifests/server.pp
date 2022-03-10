@@ -22,7 +22,7 @@ class tftpd::server(
 
     firewall { '04 tftpd':
         dport   => "69",
-        proto  => 'tcp',
+        proto  => 'udp',
 	ctstate => ['NEW','ESTABLISHED','RELATED'],
         action => 'accept',
     }
