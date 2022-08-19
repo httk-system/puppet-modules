@@ -30,10 +30,22 @@ class ssh::server(
 
     if $fail2ban {
 
-      class { 'fail2ban':
-        package_ensure => 'latest',
-        email => 'root@localhost',
-        action => 'action_'
+      case $::lsbdistcodename {
+        'jammy': {
+          class { 'fail2ban':
+            package_ensure => 'latest',
+            email => 'root@localhost',
+            action => 'action_',
+  	    config_file_template => "fail2ban/Ubuntu/20.04/etc/fail2ban/jail.conf.epp"
+          }	 
+	}
+        default: {
+          class { 'fail2ban':
+            package_ensure => 'latest',
+            email => 'root@localhost',
+            action => 'action_'
+          }
+        }
       }
 
       file {
