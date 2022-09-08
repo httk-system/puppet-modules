@@ -3,6 +3,7 @@ class public_init() {
     ensure_resource('file','/root/control',{ensure => 'directory',owner => 'root',mode => '0700'})
     ensure_resource('file','/root/secrets',{ensure => 'directory',owner => 'root',mode => '0700'})
     ensure_resource('file','/root/flags',{ensure => 'directory',owner => 'root',mode => '0700'})
+    ensure_resource('file','/root/collectors',{ensure => 'directory',owner => 'root',mode => '0700'})
     ensure_resource('file','/root/bin',{ensure => 'directory',owner => 'root',mode => '0700'})
     ensure_resource('file','/root/puppet',{ensure => 'directory',owner => 'root',mode => '0700'})
 
