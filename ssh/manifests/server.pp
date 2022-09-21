@@ -2,6 +2,7 @@ class ssh::server(
   $port = 22,
   $password_auth = false,
   $fail2ban = true,
+  $fail2ban_exclude = [],
 ){
 
     package { 'ssh':
@@ -36,14 +37,16 @@ class ssh::server(
             package_ensure => 'latest',
             email => 'root@localhost',
             action => 'action_',
-  	    config_file_template => "fail2ban/Ubuntu/20.04/etc/fail2ban/jail.conf.epp"
+  	    config_file_template => "fail2ban/Ubuntu/20.04/etc/fail2ban/jail.conf.epp",
+	    whitelist => $fail2ban_exclude,
           }	 
 	}
         default: {
           class { 'fail2ban':
             package_ensure => 'latest',
             email => 'root@localhost',
-            action => 'action_'
+            action => 'action_',
+	    whitelist => $fail2ban_exclude,
           }
         }
       }
