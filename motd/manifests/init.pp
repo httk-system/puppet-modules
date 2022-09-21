@@ -6,7 +6,7 @@ class motd(
         ensure => 'present',
     } ->
     file {
-        '/etc/update-motd.d/50-puppet-motd.erb':
+        '/etc/update-motd.d/50-puppet-motd':
          content => template('motd/etc-update-motd.d-50-puppet-motd.erb'),
          ensure => present,
          owner => 'root', group => 'root', mode => '0755',
