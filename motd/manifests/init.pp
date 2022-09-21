@@ -1,5 +1,5 @@
 class motd(
-  $motd_message,
+  $message,
 ){
 
     package { 'update-motd':
