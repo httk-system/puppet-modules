@@ -16,7 +16,7 @@ class resolved(
         enable     => true,
     }
 
-    firewall { '05 resolved':
+    firewall { '105 resolved':
         dport   => "53",
         proto  => ['udp','tcp'],
 	ctstate => ['NEW','ESTABLISHED','RELATED'],

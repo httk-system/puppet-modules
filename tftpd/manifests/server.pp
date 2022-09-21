@@ -20,7 +20,7 @@ class tftpd::server(
         enable     => true,
     }
 
-    firewall { '04 tftpd':
+    firewall { '104 tftpd':
         dport   => "69",
         proto  => 'udp',
 	ctstate => ['NEW','ESTABLISHED','RELATED'],

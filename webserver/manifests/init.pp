@@ -14,13 +14,13 @@ class webserver {
       }
       class { 'apache::mod::php': }      
 
-    firewall { '010 http 80':
+    firewall { '110 http 80':
         dport   => '80',
         proto  => 'tcp',
         action => 'accept',
     }
 
-    firewall { '010 http 443':
+    firewall { '110 http 443':
         dport   => '443',
         proto  => 'tcp',
         action => 'accept',

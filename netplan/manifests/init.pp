@@ -9,10 +9,11 @@ class netplan (
 	ensure => present,
 	owner => 'root', group => 'root', mode => '0700',
     }
-    ~>
-    exec { 'netplan apply':
-      command => '/usr/sbin/netplan apply',
-    }
+    #~>
+    #exec { 'netplan apply':
+    #  command => '/usr/sbin/netplan apply',
+    #}
+    notice("You may need to run netplan apply. Disabled due to problems re-running netplan apply with renderer: networkd.")
 
   if $ipforward {
     $ipforward_setting='1'

@@ -22,7 +22,7 @@ class ssh::server(
         enable     => true,
     }
 
-    firewall { '04 ssh':
+    firewall { '104 ssh':
         dport   => "$port",
         proto  => 'tcp',
 	ctstate => ['NEW','ESTABLISHED','RELATED'],
