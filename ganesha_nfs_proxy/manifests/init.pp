@@ -38,14 +38,14 @@ class ganesha_nfs_proxy(
         enable     => true,
     }
 
-    firewall { '04 ganesha_udp':
+    firewall { '104 ganesha_udp':
         dport   => [111, 2049, 4002],
         proto  => 'udp',
 	ctstate => ['NEW','ESTABLISHED','RELATED'],
         action => 'accept',
     }
 
-    firewall { '04 ganesha_tcp':
+    firewall { '104 ganesha_tcp':
         dport   => [111, 2049, 4002],
         proto  => 'tcp',
 	ctstate => ['NEW','ESTABLISHED','RELATED'],
