@@ -1,0 +1,65 @@
+###################################################
+#
+# Ganesha Config
+#
+# This file is managed by puppet -- DO NOT EDIT
+#
+###################################################
+
+NFS_CORE_PARAM {
+	#mount_path_pseudo = true;
+	Protocols = 4;
+        Bind_addr = <%= @bind_ip %>;
+}
+
+
+EXPORT
+{
+	# Export Id (mandatory, each EXPORT must have a unique Export_Id)
+	Export_Id = 77;
+
+	# Exported path (mandatory, path to export on the remote server)
+	Path = <%= @remote_path %>;
+
+	# Pseudo Path (required for NFS v4)
+	Pseudo = <%= @export_path %>;
+
+        SecType = sys;
+        NFS_Protocols = 4;
+        Transport_Protocols = TCP;
+
+	Access_Type = RW;
+
+	Squash = no_root_squash;
+
+	# Exporting FSAL
+	FSAL {
+		Name = PROXY_V4;
+		Srv_Addr = <%= @remote_server_ip %>;
+		Use_Privileged_Client_Port = true;
+                NFS_Port = 2049;
+	}
+        CLIENT {
+                Clients = @Clients;
+                Access_Type = RW;
+                Squash = No_Root_Squash;
+        }
+}
+
+LOG {
+	## Default log level for all components
+	Default_Log_Level = WARN;
+
+	## Configure per-component log levels.
+	#Components {
+		#FSAL = INFO;
+		#NFS4 = EVENT;
+	#}
+
+	## Where to log
+	Facility {
+		name = FILE;
+		destination = "/var/log/ganesha.log";
+		enable = active;
+	}
+}
