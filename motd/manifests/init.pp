@@ -3,8 +3,8 @@ class motd(
 ){
 
     package { 'update-motd':
-        ensure => present,
-    } ->	
+        ensure => 'present',
+    } ->
     file {
         '/etc/update-motd.d/50-puppet-motd.erb':
          content => template('motd/etc-update-motd.d-50-puppet-motd.erb'),
@@ -12,6 +12,6 @@ class motd(
          owner => 'root', group => 'root', mode => '0755',
     } ~>
     exec { 'update-motd':
-        command   => 'update-motd',
+        command   => '/usr/sbin/update-motd',
     }
 }
