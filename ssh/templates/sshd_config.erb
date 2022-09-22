@@ -43,8 +43,11 @@ PrintMotd no
 PrintLastLog yes
 TCPKeepAlive yes
 
-# Allow client to pass locale environment variables
+# Allow client to pass locale environment variables and GPG_AGENT_INFO
 AcceptEnv LANG LC_*
 
 Subsystem sftp /usr/lib/openssh/sftp-server
 UsePAM yes
+
+# Better handling of forwarded sockets
+StreamLocalBindUnlink yes
