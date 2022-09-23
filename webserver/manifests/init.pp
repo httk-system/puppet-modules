@@ -1,4 +1,6 @@
-class webserver {
+class webserver(
+  $php_version = undef
+  ){
 
       class { 'apache':
       	    default_vhost => false,
@@ -13,20 +15,28 @@ class webserver {
          ssl_compression => false,
       }
 
-      case $::lsbdistcodename {
-        'focal': {
-          class { 'apache::mod::php':
-            php_version => '7.4'
+      if ! $php_version {
+        case $::lsbdistcodename {
+          'focal': {
+            class { 'apache::mod::php':
+              php_version => '7.4'
+            }
           }
-        }
-        'jammy': {
-          class { 'apache::mod::php':
-            php_version => '8.1'
+          'jammy': {
+            class { 'apache::mod::php':
+              php_version => '8.1'
+            }
           }
-        }
-        default: {
+          default: {
             fail("Unsupported major of ${facts}['operatingsystem']")
+          }
         }
+      } else {
+
+        class { 'apache::mod::php':
+          php_version => '8.1'
+        }
+
       }
 
 
