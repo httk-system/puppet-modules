@@ -34,7 +34,7 @@ class webserver(
       } else {
 
         class { 'apache::mod::php':
-          php_version => '8.1'
+          php_version => "$php_version"
         }
 
       }
