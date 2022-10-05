@@ -24,9 +24,14 @@ function setup_workstation::host(
       'cheese',
       'gnome-tweaks',
       'gnome-shell-extension-manager',
+      'ttf-mscorefonts-installer',
+      'sshfs',
+      'elpa-puppet-mode',
   ]
 
-  manage_packages::present($package_list)
+  manage::packages::present($package_list)
+
+  
 
   # Dependencies
   []

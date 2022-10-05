@@ -1,0 +1,36 @@
+# A bit of an opininated rant on handling resources in Puppet follows.
+#
+# Resources should really only be used for piecies of configuration that by nature is
+# local to a single module and can exist (or not) independently of what is going on
+# in other modules. Think, e.g., of an Apache virtual host declaration (where all modules
+# interacting with different virtual hosts would do an 'include apache').
+#
+# However, the two standard resource types 'packages' and 'services'
+# in Puppet act more according to a 'class' paradigm. It is very possible (and a common)
+# that more than one module needs the same package to be installed or relies on that
+# the same service is running. Nevertheless, it is both bulky, and difficult to sycronize between
+# modules created by different people, to define classes for all software packages and services.
+#
+# Hence, to fix this issue we will allow ourselves to use the sometimes dreaded defined function,
+# in what I think is a safe way.
+#
+# Furthermore, for these should-be-classes, it is really should only be relevant to turn
+# them "on" or "off". Hence, for 'packages' we only provide functionality for
+# ensure => 'present' or 'absent'. Regarding the other ensure values:
+#
+# * ensure => 'latest' should be used since Puppet is a configuration management tool
+#             and really shouldn't be relied on to double-work as an 'inline' software
+#             package upgrade tool.
+#
+# * ensure => 'disabled' makes no sense, it is the corresponding services that should
+#             be 'disabled'. For non-service-providing packages, what does it even mean for them
+#             to be 'disabled'?
+#
+# * ensure => 'purged': we are meant to manage configuration files with Puppet,
+#             why do we try to also use the system package manager to manage the precense
+#             of config files?
+#
+# * ensure => 'installed': supposedly synonymous with 'present', but less used and
+#             in some contexts mixing both generate issues with detecting that two
+#             package declaration are equivalent.
+#
