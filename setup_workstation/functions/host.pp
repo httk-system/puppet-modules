@@ -31,7 +31,10 @@ function setup_workstation::host(
 
   manage::packages::present($package_list)
 
-  
+  class { 'anaconda':
+    flavor => "Mambaforge",
+    version => "4.14.0-0"
+  }
 
   # Dependencies
   []
