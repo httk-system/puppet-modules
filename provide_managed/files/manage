@@ -1,0 +1,14 @@
+#!/bin/sh
+
+case "$1" in
+    "configure")
+        echo "Safely applying puppet"
+        ;;
+    "update")
+        echo "Upgrading system"
+        ;;
+    *)
+        echo "Unknown command"
+        exit 1
+        ;;
+esac
