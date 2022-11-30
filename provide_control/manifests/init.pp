@@ -15,6 +15,11 @@ class provide_control() {
     require => File['/usr/control'],
   }
 
-  
-  
+  file { '/etc/sudoers.d/control_set_default_path':
+    ensure  => 'present',
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0440',
+    content => "Defaults secure_path = \"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/usr/control\"\n"
+  }
 }
