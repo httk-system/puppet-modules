@@ -1,7 +1,5 @@
 class simpleslurm (
 ) {
-    include public_init
-
     $nodename=$facts['hostname']
 
     package { [

@@ -2,8 +2,6 @@ class netplan (
   $ifs,
   $ipforward,
 ) {
-    include public_init
-
     file { '/etc/netplan/20-interfaces.yaml':
 	content => template('netplan/etc-netplan-20-interfaces.yaml.erb'),
 	ensure => present,

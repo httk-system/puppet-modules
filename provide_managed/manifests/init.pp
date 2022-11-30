@@ -19,4 +19,38 @@ class provide_managed() {
     source  => 'puppet:///modules/provide_managed/etc-sudoers.d-puppet-setups-manage',
   }
   
+  file { '/root/managed':
+    ensure => 'directory',
+    owner => 'root',
+    mode => '0700',
+  }
+  
+  file { '/root/managed/secrets':
+    ensure => 'directory',
+    owner => 'root',
+    mode => '0700',
+    require=>File['/root/managed'],
+  }
+
+  file { '/root/managed/flags':
+    ensure => 'directory',
+    owner => 'root',
+    mode => '0700',
+    require=>File['/root/managed'],
+  }
+
+  file { '/root/managed/collectors':
+    ensure => 'directory',
+    owner => 'root',
+    mode => '0700',
+    require=>File['/root/managed'],
+  }
+
+  file { '/root/managed/installers':
+    ensure => 'directory',
+    owner = 'root',
+    mode => '0700',
+    require=>File['/root/managed'],
+  }
+  
 }

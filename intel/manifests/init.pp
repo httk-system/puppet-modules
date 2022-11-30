@@ -1,8 +1,6 @@
 class intel (
   $fabric="shm"
 ) {
-    include public_init
-
     include apt
 
     apt::key {'intel-graphics':
@@ -79,6 +77,3 @@ class intel (
     }
 
 }
-
-
-

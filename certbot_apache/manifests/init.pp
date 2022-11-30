@@ -1,7 +1,5 @@
 class certbot_apache {
 
-    include public_init
-
     package {
 	'certbot':
             ensure => installed,

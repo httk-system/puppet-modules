@@ -1,36 +1,36 @@
 class accounts() {
 
-    include public_init
+    include provide_managed
 
     file {
-        '/root/accounts':
+        '/root/managed/accounts':
 	    ensure => 'directory',owner => 'root',mode => '0700',
     }
     ->
     file {
-        '/root/accounts/create.d':
+        '/root/managed/accounts/create.d':
 	    ensure => 'directory',owner => 'root',mode => '0700',
 	    ;
-	'/root/accounts/destroy.d':
+	'/root/managed/accounts/destroy.d':
 	    ensure => 'directory',owner => 'root',mode => '0700',
 	    ;
-	'/root/accounts/setpass.d':
+	'/root/managed/accounts/setpass.d':
 	    ensure => 'directory',owner => 'root',mode => '0700',
 	    ;
     }
     ->
     file {
-        '/root/accounts/create.sh':
+        '/root/managed/accounts/create.sh':
             owner => root, group => root, mode => '0700',
             ensure  => present,
             source => 'puppet:///modules/accounts/create.sh',
             ;
-        '/root/accounts/destroy.sh':	    
+        '/root/managed/accounts/destroy.sh':	    
             owner => root, group => root, mode => '0700',
             ensure  => present,
             source => 'puppet:///modules/accounts/destroy.sh',
             ;	    
-        '/root/accounts/setpass.sh':
+        '/root/managed/accounts/setpass.sh':
             owner => root, group => root, mode => '0700',
             ensure  => present,
             source => 'puppet:///modules/accounts/setpass.sh',

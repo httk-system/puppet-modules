@@ -2,8 +2,6 @@ class slurm (
   $is_controller=false,
   $is_node=false,
 ) {
-    include public_init
-
     package { [
       'slurm-wlm',
     ]:

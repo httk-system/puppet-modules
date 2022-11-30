@@ -1,7 +1,5 @@
 class aptcacher {
 
-    include public_init
-
     package { 'apt-cacher-ng':
     	ensure => 'present',
     }

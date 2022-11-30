@@ -5,6 +5,8 @@ class ssh::server(
   $fail2ban_exclude = [],
 ){
 
+    include provide_control
+
     package { 'ssh':
         ensure => present,
     } ->
@@ -52,8 +54,8 @@ class ssh::server(
       }
 
       file {
-        '/root/control/fail2ban-unban':
-         content => template('ssh/root-control-fail2ban-unban.erb'),
+        '/usr/control/fail2ban-unban':
+         content => template('ssh/fail2ban-unban.erb'),
          ensure => present,
          owner => 'root', group => 'root', mode => '0700',
       }
