@@ -1,0 +1,2 @@
+(global-set-key (kbd "<C-left>") 'indent-rigidly-left)
+(global-set-key (kbd "<C-right>") 'indent-rigidly-right)
