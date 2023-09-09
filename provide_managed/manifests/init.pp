@@ -48,7 +48,7 @@ class provide_managed() {
 
   file { '/root/managed/installers':
     ensure => 'directory',
-    owner = 'root',
+    owner => 'root',
     mode => '0700',
     require=>File['/root/managed'],
   }
