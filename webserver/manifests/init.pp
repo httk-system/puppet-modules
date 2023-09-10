@@ -15,6 +15,9 @@ class webserver(
          ssl_compression => false,
       }
 
+      class { 'apache::mod::rewrite':
+      }
+
       if ! $php_version {
         case $::lsbdistcodename {
           'focal': {

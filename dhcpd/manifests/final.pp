@@ -24,15 +24,15 @@ define dhcpd::final() {
 
     notice("dhcpd: $collected")
 
-    class { 'dhcp':
-        service_ensure => running,
-        dnsdomain    => $collected['dnsdomains'],
-        nameservers  => $collected['nameservers'],
-        ntpservers   => $collected['ntpservers'],
-        interfaces   => $collected['interfaces'],
-        pxeserver => $pxeserver,
-        pxefilename => $pxefilename,
-    }
+    #class { 'dhcp':
+    #    service_ensure => running,
+    #    dnsdomain    => $collected['dnsdomains'],
+    #    nameservers  => $collected['nameservers'],
+    #    ntpservers   => $collected['ntpservers'],
+    #    interfaces   => $collected['interfaces'],
+    #    pxeserver => $pxeserver,
+    #    pxefilename => $pxefilename,
+    #}
 
   }
 

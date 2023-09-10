@@ -16,13 +16,13 @@ define certbot_apache::request (
     if $eff_email {
       $eff_email_arg = "--eff-email"
     } else {
-      $eff_email_arg = "--no-eff-email"     
+      $eff_email_arg = "--no-eff-email"
     }
 
     if $https_redirect {
       $redirect_arg = "--redirect"
     } else {
-      $redirect_arg = "--no-redirect"     
+      $redirect_arg = "--no-redirect"
     }
 
     exec {
@@ -31,10 +31,10 @@ define certbot_apache::request (
 			Package['certbot'],
 		        Package['python3-certbot-apache'],
 			],
-	    command => "certbot -n --keep-until-expiring --apache -m $certbot_email $eff_email_arg $redirect_arg -d $domain_args",
+	    command => "certbot -n --keep-until-expiring --expand --apache -m $certbot_email $eff_email_arg $redirect_arg -d $domain_args",
 	    provider => shell,
             notify => $notify,
 	    logoutput => true,
     }
-    
+
 }
