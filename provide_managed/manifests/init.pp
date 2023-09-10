@@ -1,16 +1,8 @@
 class provide_managed() {
 
+  include stddirs
   include 'provide_control'
   
-  file { '/usr/control/manage':
-    ensure  => 'present',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0755',
-    source  => 'puppet:///modules/provide_managed/manage',
-    require => File['/usr/control'],
-  }
-
   file { '/etc/sudoers.d/puppet-setups-manage':
     ensure  => 'present',
     owner   => 'root',
@@ -18,6 +10,15 @@ class provide_managed() {
     mode    => '0440',
     source  => 'puppet:///modules/provide_managed/etc-sudoers.d-puppet-setups-manage',
   }
+
+  file { '/usr/control/manage':
+    ensure  => 'present',
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+    source  => 'puppet:///modules/provide_managed/manage',
+    require => File['/usr/control'],
+  }  
   
   file { '/root/managed':
     ensure => 'directory',

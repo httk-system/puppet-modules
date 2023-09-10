@@ -1,11 +1,7 @@
 class provide_control() {
 
-  file { '/usr/control':
-    ensure => 'directory',
-    owner => 'root',
-    mode => '0744',
-  }
-
+  include stddirs
+  
   file { '/etc/profile.d/puppet-setups-control.sh':
     ensure  => 'present',
     owner   => 'root',
