@@ -4,7 +4,8 @@ define certbot_apache::request (
   $agree_tos,
   $eff_email,
   $https_redirect,
-  $notify = undef,
+  $notify_target = undef,
+  $logoutput = false,
 ) {
 
     $domain_args = $certbot_domains.join(' -d ')
@@ -31,10 +32,10 @@ define certbot_apache::request (
 			Package['certbot'],
 		        Package['python3-certbot-apache'],
 			],
-	    command => "certbot -n --keep-until-expiring --expand --apache -m $certbot_email $eff_email_arg $redirect_arg -d $domain_args",
+	    command => "certbot -n --keep-until-expiring --expand --apache -m $certbot_email $eff_email_arg $redirect_arg -d $domain_args certonly",
 	    provider => shell,
-            notify => $notify,
-	    logoutput => true,
+            notify => $notify_target,
+	    logoutput => $logoutput,
     }
 
 }
