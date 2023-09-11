@@ -42,7 +42,6 @@ class webserver(
 
       }
 
-
     firewall { '110 http 80':
         dport   => '80',
         proto  => 'tcp',
@@ -58,6 +57,43 @@ class webserver(
     package { 'php-sqlite3':
     	ensure => 'latest',
 	notify => Class['Apache::Service']
+    }
+
+    apache::vhost { "default_catch:80":
+      priority   => '01',
+      vhost_name => '_default_',
+      port       => '80',
+      options    => ['None'],
+      override   => ['None'],
+      docroot => "/var/www/html",
+      docroot_owner => 'www-data',
+      docroot_group => 'www-data',
+      directories    => [{
+        'path'               => '/',
+        'require'               => 'all denied',
+      }],
+      custom_fragment => 'ErrorDocument 403 Forbidden.',
+      use_servername_for_filenames => true,
+      use_port_for_filenames => true,
+    }
+
+    apache::vhost { "default_catch:443":
+      priority   => '01',
+      vhost_name => '_default_',
+      port       => '443',
+      options    => ['None'],
+      override   => ['None'],
+      docroot => "/var/www/html",
+      docroot_owner => 'www-data',
+      docroot_group => 'www-data',
+      ssl => true,
+      directories    => [{
+        'path'               => '/',
+        'require'               => 'all denied',
+      }],
+      custom_fragment => 'ErrorDocument 403 Forbidden.',
+      use_servername_for_filenames => true,
+      use_port_for_filenames => true,
     }
 
 }

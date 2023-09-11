@@ -5,7 +5,7 @@ define certbot_apache::request (
   $eff_email,
   $https_redirect,
   $notify_target = undef,
-  $logoutput = false,
+  $logoutput = true,
 ) {
 
     $domain_args = $certbot_domains.join(' -d ')
