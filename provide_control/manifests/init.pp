@@ -2,6 +2,20 @@ class provide_control() {
 
   include stddirs
   
+  ensure_resource('package','pdsh', {'ensure' => 'present'})
+
+  file { '/etc/bash.bashrc.d':
+    ensure => 'directory',
+    owner => 'root',
+    mode => '0744',
+  }
+
+  file_line { "/etc/bash.bashrc handle bash.bashrc.d":
+    ensure => "present",
+    path => "/etc/bash.bashrc",
+    line => "for file in \"$(find /etc/bash.bashrc.d/ -maxdepth 1 -name '*.sh' -print -quit)\"; do source \"\${file}\"; done",
+  }
+
   file { '/etc/profile.d/puppet-setups-control.sh':
     ensure  => 'present',
     owner   => 'root',

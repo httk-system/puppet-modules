@@ -43,4 +43,36 @@ class helpful_user_defaults(
     require => File["${home}/.emacs.d/init.d"],
   }
 
+  notice("Consider turning off idle brightness change using this command: gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 100")
+
+  file { "${home}/.bashrc.d":
+    ensure => 'directory',
+    mode    => '0775',
+  }
+
+  file_line { "${home}/.bashrc handle .bashrc.d":
+    ensure => "present",
+    path => "${home}/.bashrc",
+    line => "for file in \"$(find ~/.bashrc.d -maxdepth 1 -name '*.sh' -print -quit)\"; do source \${file}; done",
+  }
+
+  file { "${home}/.bashrc.d/history-search.sh":
+    ensure => 'present',
+    mode    => '0664',
+    content => "
+bind '\"\\e[A\": history-search-backward'
+bind '\"\\e[B\": history-search-forward'
+",
+    require => File["${home}/.bashrc.d"]
+  }
+
+  file { "${home}/.bashrc.d/quoting-literal.sh":
+    ensure => 'present',
+    mode    => '0664',
+    content => "
+export QUOTING_STYLE=literal
+",
+    require => File["${home}/.bashrc.d"]
+  }
+
 }
