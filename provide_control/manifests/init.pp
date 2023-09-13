@@ -14,6 +14,10 @@ class provide_control() {
     ensure => "present",
     path => "/etc/bash.bashrc",
     line => "for file in \"$(find /etc/bash.bashrc.d/ -maxdepth 1 -name '*.sh' -print -quit)\"; do source \"\${file}\"; done",
+
+  class { 'gssh':
+    path => '/usr/control/gssh',
+    require => File['/usr/control'],
   }
 
   file { '/etc/profile.d/puppet-setups-control.sh':
