@@ -1,7 +1,7 @@
 class provide_control() {
 
   include stddirs
-  
+
   ensure_resource('package','pdsh', {'ensure' => 'present'})
 
   file { '/etc/bash.bashrc.d':
@@ -14,6 +14,7 @@ class provide_control() {
     ensure => "present",
     path => "/etc/bash.bashrc",
     line => "for file in \"$(find /etc/bash.bashrc.d/ -maxdepth 1 -name '*.sh' -print -quit)\"; do source \"\${file}\"; done",
+  }
 
   class { 'gssh':
     path => '/usr/control/gssh',
