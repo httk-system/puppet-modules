@@ -5,6 +5,12 @@ class webserver(
       class { 'apache':
       	    default_vhost => false,
 	    mpm_module => false,
+            mod_packages => merge($::apache::params::mod_packages, {
+              'wsgi' => 'libapache2-mod-wsgi-py3',
+            }),
+      }
+
+      class { 'apache::mod::wsgi':
       }
 
       class { 'apache::mod::prefork':
@@ -55,9 +61,16 @@ class webserver(
     }
 
     package { 'php-sqlite3':
-    	ensure => 'latest',
+    	ensure => 'installed',
 	notify => Class['Apache::Service']
     }
+
+    /* Not needed, handled by apache module
+    package { 'libapache2-mod-wsgi-py3':
+    	ensure => 'installed',
+	notify => Class['Apache::Service']
+    }
+    */
 
     apache::vhost { "default_catch:80":
       priority   => '01',
