@@ -1,0 +1,25 @@
+[Unit]
+Description=GoAccess Live Log Analyzer for <%= @hostname %>
+
+[Service]
+Type=simple
+WorkingDirectory=/tmp
+ExecStart=/usr/bin/goaccess -f <%= @logfile %> \
+          --real-time-html --ws-url=<%= @ws_url %> \
+          -o <%= @outdir %>/index.html --port=<%= @port %> \
+          --config-file=/etc/goaccess/goaccess.conf \
+          --origin=https://<%= @host %> \
+          --log-format=combined --geoip-database=/etc/goaccess/GeoLite2-Country.mmdb \
+          --anonymize-ip --persist --restore \
+          --db-path=<%= @dbpath %>
+ExecStop=/bin/kill -0 ${MAINPID}
+KillSignal=SIGINT
+RestartKillSignal=SIGINT
+PrivateTmp=false
+RestartSec=1800
+User=www-data
+Group=www-data
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
