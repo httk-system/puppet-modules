@@ -2,16 +2,18 @@ class netplan (
   $ifs,
   $ipforward,
 ) {
-    file { '/etc/netplan/20-interfaces.yaml':
-	content => template('netplan/etc-netplan-20-interfaces.yaml.erb'),
-	ensure => present,
-	owner => 'root', group => 'root', mode => '0700',
-    }
+    # We no longer manage the basic interface config in puppet, networking is required to be up for puppet to work
+    #
+    #file { '/etc/netplan/20-interfaces.yaml':
+    #	content => template('netplan/etc-netplan-20-interfaces.yaml.erb'),
+    #	ensure => present,
+    #	owner => 'root', group => 'root', mode => '0700',
+    #}
     #~>
     #exec { 'netplan apply':
     #  command => '/usr/sbin/netplan apply',
     #}
-    notice("You may need to run netplan apply. Disabled due to problems re-running netplan apply with renderer: networkd.")
+    #notice("You may need to run netplan apply. Disabled due to problems re-running netplan apply with renderer: networkd.")
 
   if $ipforward {
     $ipforward_setting='1'
@@ -24,11 +26,18 @@ class netplan (
 	ensure => present,
 	owner => 'root', group => 'root', mode => '0700',
   }
-  ~>
+
   exec {'netplan ipforward reread sysctl':
-    command => "/usr/sbin/sysctl --system"
+    command => "/usr/sbin/sysctl --system",
+    subscribe => File["/etc/sysctl.d/20-ip-forward.conf"],
+    refreshonly => true,
+    notify => Notice['netplan_reconfig'],
   }
 
+  notice { 'netplan_reconfig':
+    message => "Changing netplan settings may sometimes cause issues with dns resolution; a temporary solution can be to force a dns server with: resolvectl dns <interface> <dns ip>.",
+  }
+  
   #ini_setting { "sysconf ip_forward":
   #  ensure  => present,
   #  path    => '/etc/sysctl.conf',
