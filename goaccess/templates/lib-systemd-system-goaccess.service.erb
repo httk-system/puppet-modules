@@ -9,7 +9,7 @@ ExecStart=/usr/bin/goaccess -f <%= @logfile %> \
           -o <%= @outdir %>/index.html --port=<%= @port %> \
           --config-file=/etc/goaccess/goaccess.conf \
           --origin=https://<%= @host %> \
-          --log-format=combined --geoip-database=/etc/goaccess/dbip-city-lite-2023-11.mmdb \
+          --log-format=combined --geoip-database=/etc/goaccess/GeoLite2-City.mmdb \
           --anonymize-ip --persist --restore \
           --db-path=<%= @dbpath %>
 ExecStop=/bin/kill -0 ${MAINPID}
