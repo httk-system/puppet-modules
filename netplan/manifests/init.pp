@@ -31,21 +31,20 @@ class netplan (
     command => "/usr/sbin/sysctl --system",
     subscribe => File["/etc/sysctl.d/20-ip-forward.conf"],
     refreshonly => true,
-    notify => Notice['netplan_reconfig'],
+    notify => Exec["notify netplan change"],
   }
 
-  notice { 'netplan_reconfig':
-    message => "Changing netplan settings may sometimes cause issues with dns resolution; a temporary solution can be to force a dns server with: resolvectl dns <interface> <dns ip>.",
+  exec { "notify netplan change":
+    command => "/usr/bin/echo 'Changing netplan settings may sometimes cause issues with dns resolution; a temporary solution can be to force a dns server with: resolvectl dns <interface> <dns ip>.'",
+    refreshonly => true,
   }
-  
+
+
   #ini_setting { "sysconf ip_forward":
   #  ensure  => present,
   #  path    => '/etc/sysctl.conf',
   #  setting => 'net.ipv4.ip_forward',
   #  value => $ipforward_setting
   #}
-
-
-
 
 }
