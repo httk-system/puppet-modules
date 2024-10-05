@@ -1,0 +1,126 @@
+#!/bin/bash
+#
+# This is a version that awaits the ability of goaccess to allow filtering on date when using its own database.
+# See https://github.com/allinurl/goaccess/issues/117
+#
+
+LOGFILE="$1"    # Log file path
+DBPATH="$2"     # Database path
+ORIGIN="$3"     # Web url where site is served
+OUTDIR="$4"     # Output directory for the static HTML pages
+
+if [ -z "$LOGFILE" -o -z "$DBPATH" -o -z "$ORIGIN" -o -z "$OUTDIR" ]; then
+    echo "Usage: goaccess-generate <logfile> <dbpath> <origin> <outdir>"
+    echo ""
+    exit 1
+fi
+
+if [ ! -e "$OUTDIR" -o ! -e "$DBPATH" ]; then
+    echo "Specified directories do not exist."
+    echo ""
+    exit 1
+fi
+
+# Initialize the index file
+INDEX_FILE="$OUTDIR/index.html"
+echo "<html><head><title>GoAccess Reports</title></head><body>" > "$INDEX_FILE"
+echo "<h1>GoAccess Reports</h1>" >> "$INDEX_FILE"
+echo "<p><a href=\"all.html\">All</a></p>" >> "$INDEX_FILE"
+
+# Initialize a temporary file to store report links (in reverse order)
+TMP_FILE=$(mktemp)
+
+# 1. Parse the entire log file and build the database
+echo "Parsing the entire log file and building the GoAccess database..."
+goaccess "$LOGFILE" \
+         --config-file=/etc/goaccess/goaccess.conf \
+         --log-format=COMBINED --geoip-database=/etc/goaccess/GeoLite2-City.mmdb \
+         --db-path="$DBPATH" \
+         --origin="$ORIGIN" \
+         --restore \
+         --persist \
+         --output="$OUTDIR/all.html" \
+
+if [ $? -ne 0 ]; then
+    echo "Failed to parse the log file and build the GoAccess database."
+    exit 1
+fi
+
+echo "Database built successfully. Proceeding to generate reports..."
+
+# Function to generate GoAccess report for a given time range from the database
+generate_report() {
+    local start_date="$1"
+    local end_date="$2"
+    local period_name="$3"
+    local output_file="$4"
+
+    echo "Generating report for $period_name ($start_date to $end_date)..."
+
+    # Run goaccess from the persisted database (without reading the log file)
+    # Note: the start-date and end-date does not exist in current versions of goaccess
+    goaccess \
+        --config-file=/etc/goaccess/goaccess.conf \
+        --geoip-database=/etc/goaccess/GeoLite2-City.mmdb \
+        --db-path="$DBPATH" \
+        --restore \
+        --start-date="$start_date" --end-date="$end_date" \
+        --output="$OUTDIR/$output_file.html" \
+
+    if [ $? -ne 0 ]; then
+        echo "GoAccess failed to generate the report for $period_name."
+        exit 1
+    fi
+
+    echo "GoAccess report for $period_name generated successfully at $OUTDIR/$output_file.html"
+
+    # Add a link to the report in the temporary file (this will be reversed)
+    echo "<p><a href=\"$output_file.html\">$period_name ($start_date to $end_date)</a></p>" >> "$TMP_FILE"
+}
+
+# 2. Generate one report per day for the last week (up to yesterday) - REVERSED
+echo "Generating daily reports for the last week..."
+for day in $(seq 7 -1 1); do
+    start_date=$(date --date="$day days ago" "+%Y-%m-%d")
+    end_date="$start_date"
+    period_name="$start_date"
+    generate_report "$start_date" "$end_date" "Day $period_name" "report-day-$period_name"
+done
+
+# 3. Generate one report per week for the last month - REVERSED
+echo "Generating weekly reports for the last month..."
+for week in $(seq 3 -1 0); do
+    start_date=$(date --date="-$week weeks" "+%Y-%m-%d")
+    end_date=$(date --date="$start_date +6 days" "+%Y-%m-%d")
+    period_name="Week ending $(date --date="$start_date +6 days" "+%Y-%m-%d")"
+    generate_report "$start_date" "$end_date" "Week $period_name" "report-week-$period_name"
+done
+
+# 4. Generate one report per month for the last year - REVERSED
+echo "Generating monthly reports for the last year..."
+for month in $(seq 11 -1 0); do
+    start_date=$(date --date="-$month months" "+%Y-%m-01")
+    end_date=$(date --date="$start_date +1 month -1 day" "+%Y-%m-%d")
+    period_name=$(date --date="-$month months" "+%B %Y")
+    generate_report "$start_date" "$end_date" "Month $period_name" "report-month-$period_name"
+done
+
+# 5. Generate one report per year for each year of data - REVERSED
+echo "Generating yearly reports..."
+for year in $(seq $(date +%Y) -1 $(date --date="$(ls -t $LOGFILE | tail -1)" +%Y)); do
+    start_date="${year}-01-01"
+    end_date="${year}-12-31"
+    generate_report "$start_date" "$end_date" "Year $year" "report-year-$year"
+done
+
+# 6. Append the reversed links to the index.html file
+cat "$TMP_FILE" >> "$INDEX_FILE"
+
+# Finalize the index.html file
+echo "</body></html>" >> "$INDEX_FILE"
+
+# Remove the temporary file
+rm "$TMP_FILE"
+
+echo "All reports generated successfully. Index file created at $INDEX_FILE."
+exit 0

@@ -1,0 +1,202 @@
+#!/bin/bash
+
+# Command line arguments
+LOGFILE="$1"           # Path to the raw log file
+PROCESS_DIR="$2"       # Processing directory for storing split log files
+ORIGIN="$3"            # URL where the site is served
+OUTDIR="$4"            # Output directory for GoAccess reports
+
+# Check if command line arguments are provided
+if [ -z "$LOGFILE" ] || [ -z "$PROCESS_DIR" ] || [ -z "$ORIGIN" ] || [ -z "$OUTDIR" ]; then
+    echo "Usage: goaccess-generate <logfile> <process_dir> <origin> <outdir>"
+    echo ""
+    exit 1
+fi
+
+# Check if specified directories exist
+if [ ! -d "$OUTDIR" ] || [ ! -d "$PROCESS_DIR" ]; then
+    echo "Specified directories do not exist."
+    echo ""
+    exit 1
+fi
+
+# Ensure processing directories exist
+mkdir -p "$PROCESS_DIR/year" "$PROCESS_DIR/month" "$PROCESS_DIR/day" "$PROCESS_DIR/db"
+
+# Get the first year from the log file
+FIRST_YEAR=$(awk 'match($0, /\[([0-9]{2}\/[A-Za-z]{3}\/[0-9]{4})/, a) {print a[1]; exit}' "$LOGFILE" | awk -F'/' '{print $3}')
+CURRENT_YEAR=$(date +%Y)
+
+# Function to create log files for a given time period
+create_log_files() {
+    local period="$1"
+    local log_date_format="$2"
+    local grep_date_format="$3"
+    local unit="$4"
+    local max_offset="$5"
+
+    echo "Processing $period logs..."
+
+    for date_offset in $(seq 0 "$max_offset"); do
+        log_date=$(date -d "-$date_offset $unit" "+$log_date_format")
+        grep_date=$(date -d "-$date_offset $unit" "+$grep_date_format")
+
+        # Build grep pattern based on period
+        case "$period" in
+            year)
+                grep_pattern="/$grep_date:"
+                ;;
+            month)
+                grep_pattern="/$grep_date:"
+                ;;
+            day)
+                grep_pattern="\\[$grep_date"
+                ;;
+            *)
+                grep_pattern="\\[$grep_date"
+                ;;
+        esac
+
+        # Check if log file exists, and if not, create it
+        if [[ ! -f "$PROCESS_DIR/$period/$log_date.log" ]] || [[ "$date_offset" == "0" ]]; then
+            echo "Creating $period log file for $log_date..."
+
+            # Extract logs matching the specific date
+            grep "$grep_pattern" "$LOGFILE" | grep -v "Better Uptime Bot\|Googlebot\|AhrefsBot\|Qwantbot\|bingbot\|Applebot\|OAI-SearchBot\|AwarioSmartBot\|AwarioBot\|Amazonbot\|SemrushBot\|ImagesiftBot\|YandexBot\|CCBot\|GPTBot\|PerplexityBot\|SeznamBot\|wpbot\|Slackbot\|ClaudeBot\|Slack-ImgProxy\|BLEXBot\|YandexFavicons\|YandexNews\|YandexImages\|DataForSeoBot\|DotBot\|Bravebot\|MJ12bot\|DuckDuckBot\|DuckDuckGo-Favicons-Bot\|facebookexternalhit\|facebookscraper\|facebook.com\|developers.facebook.com/docs/sharing/webmasters/crawler\|Maillocals Bot\|Gulper Web Bot\|Exabot\|Magus Bot\|TelegramBot\|RepoLookoutBot\|Twitterbot\|msnbot\|developers.snap.com/robots\|TurnitinBot\|Zoombot\|FeedFetcher-Google\|GoogleImageProxy\|https://help.qwant.com/bot/\|GET /internal/\|GET /robots.txt " > "$PROCESS_DIR/$period/$log_date.log"
+	    # Make sure report is re-generated if it already exist
+	    rm -f "$OUTDIR/report-${period}-${log_date}.html" "$OUTDIR/report-${period}-${log_date}.csv"
+        fi
+    done
+}
+
+# Function to remove old log files for a given time period
+remove_old_log_files() {
+    local period="$1"
+    local log_date_format="$2"
+    local unit="$3"
+    local max_offset="$4"
+
+    # Calculate the cutoff date
+    cutoff_date=$(date -d "-$max_offset $unit" "+$log_date_format")
+
+    echo "Removing old $period log files older than $cutoff_date..."
+
+    # Iterate over log files in the period directory
+    for logfile in "$PROCESS_DIR/$period/"*.log; do
+        # Check if the glob didn't match any files
+        if [[ ! -e "$logfile" ]]; then
+            continue
+        fi
+
+        # Extract the date part from the filename
+        filename=$(basename "$logfile")
+        file_date="${filename%.log}"
+
+        # Compare the file date with the cutoff date
+        if [[ "$file_date" < "$cutoff_date" ]]; then
+            echo "Removing old log file: $logfile"
+            rm -f "$PROCESS_DIR/${period}/${file_date}.log" "$OUTDIR/report-${period}-${file_date}.html" "$OUTDIR/report-${period}-${file_date}.csv"
+        fi
+    done
+}
+
+
+# 1. Create yearly log files
+create_log_files "year" "%Y" "%Y" "year" "$((CURRENT_YEAR - FIRST_YEAR))"
+
+# 2. Create monthly log files
+create_log_files "month" "%Y-%m" "%b/%Y" "month" "11"
+
+# 3. Create daily log files
+create_log_files "day" "%Y-%m-%d" "%d/%b/%Y" "day" "6"
+
+# Remove old log files older than the current range
+remove_old_log_files "month" "%Y-%m" "month" "11"
+remove_old_log_files "day" "%Y-%m-%d" "day" "6"
+
+# 5. Generate GoAccess reports for each period
+generate_goaccess_reports() {
+    local period="$1"
+    local output_prefix="$2"
+
+    echo "Generating GoAccess reports for $period..."
+
+    for log_file in "$PROCESS_DIR/$period"/*.log; do
+        if [[ -f "$log_file" ]]; then
+            period_date=$(basename "$log_file" .log)
+            report_file="$OUTDIR/${output_prefix}-${period_date}.html"
+
+            # Check if the report file already exists
+            if [[ -f "$report_file" ]]; then
+                echo "Report for $period_date already exists. Skipping..."
+                continue
+            fi
+
+            rm -f "$PROCESS_DIR/db"/*.db
+
+            # Run GoAccess for each log file
+            goaccess "$log_file" \
+               --config-file=/etc/goaccess/goaccess.conf \
+               --log-format=COMBINED --geoip-database=/etc/goaccess/GeoLite2-City.mmdb \
+               --anonymize-ip \
+               --ignore-crawlers \
+               --origin="$ORIGIN" \
+               --db-path="$PROCESS_DIR/db" \
+               --origin="$ORIGIN" \
+               --output="$report_file" \
+               --output="$OUTDIR/${output_prefix}-${period_date}.csv" \
+	       --output="$OUTDIR/${output_prefix}-${period_date}.json"
+	    
+            echo "Report generated: $report_file"
+        fi
+    done
+}
+
+# Generate reports for yearly, monthly, and daily logs
+generate_goaccess_reports "year" "report-year"
+generate_goaccess_reports "month" "report-month"
+generate_goaccess_reports "day" "report-day"
+
+# 5. Generate index.html with all reports
+generate_index() {
+    echo "Generating index.html..."
+    index_file="$OUTDIR/index.html"
+
+    echo "<html><head><title>GoAccess Historical Reports</title></head><body>" > "$index_file"
+    echo "<h1>GoAccess Reports</h1>" >> "$index_file"
+    echo "<p>Note: in compoing these reports, all known web crawlers and bots have been removed with the aim to show real, genuine, visitors.</p>" >> "$index_file"
+
+    # Add daily reports (latest first)
+    echo "<h2>Daily Reports</h2><ul>" >> "$index_file"
+    for report in $(cd "$OUTDIR" && ls -t report-day-*.html); do
+	basename=$(basename "$report" .html)
+	VISITORS=$(awk -F, '$12 ~ /unique_visitors/ {sub(/\r/,""); gsub(/"/, ""); print($11);}' "${OUTDIR}/${basename}.csv")
+        echo "<li>$basename: <a href='${basename}.html'>web</a> - <a href='${basename}.csv'>csv</a> - <a href='${basename}.json'>json</a> - unique visitors: $VISITORS</li>" >> "$index_file"
+    done
+    echo "</ul>" >> "$index_file"
+
+    # Add monthly reports (latest first)
+    echo "<h2>Monthly Reports</h2><ul>" >> "$index_file"
+    for report in $(cd "$OUTDIR" && ls -t report-month-*.html); do
+	basename=$(basename "$report" .html)
+	VISITORS=$(awk -F, '$12 ~ /unique_visitors/ {sub(/\r/,""); gsub(/"/, ""); print($11);}' "${OUTDIR}/${basename}.csv")
+        echo "<li>$basename: <a href='${basename}.html'>web</a> - <a href='${basename}.csv'>csv</a> - <a href='${basename}.json'>json</a> - unique visitors: $VISITORS</li>" >> "$index_file"
+    done
+    echo "</ul>" >> "$index_file"
+
+    # Add yearly reports (latest first)
+    echo "<h2>Yearly Reports</h2><ul>" >> "$index_file"
+    for report in $(cd "$OUTDIR" && ls -t report-year-*.html); do
+	basename=$(basename "$report" .html)
+	VISITORS=$(awk -F, '$12 ~ /unique_visitors/ {sub(/\r/,""); gsub(/"/, ""); print($11);}' "${OUTDIR}/${basename}.csv")
+        echo "<li>$basename: <a href='${basename}.html'>web</a> - <a href='${basename}.csv'>csv</a> - <a href='${basename}.json'>json</a> - unique visitors: $VISITORS</li>" >> "$index_file"
+    done
+    echo "</ul>" >> "$index_file"
+
+    echo "</body></html>" >> "$index_file"
+    echo "Index.html generated at $index_file"
+}
+
+generate_index
+
+echo "Log preprocessing and GoAccess report generation completed."
