@@ -13,8 +13,8 @@ class anaconda (
 
   include stddirs
   
-  $pkgs = ['libgl1-mesa-glx',
-          'libegl1-mesa',
+  $pkgs = ['libgl1',
+          'libglx-mesa0',
           'libxrandr2',
           'libxss1',
           'libxcursor1',
