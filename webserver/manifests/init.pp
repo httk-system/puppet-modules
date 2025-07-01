@@ -5,16 +5,16 @@ class webserver(
       class { 'apache':
       	    default_vhost => false,
 	    mpm_module => false,
-            mod_packages => merge($::apache::params::mod_packages, {
-              'wsgi' => 'libapache2-mod-wsgi-py3',
-            }),
+            #mod_packages => merge($::apache::params::mod_packages, {
+            #  'wsgi' => 'libapache2-mod-wsgi-py3',
+            #}),
       }
 
       class { 'apache::mod::wsgi':
       }
 
       class { 'apache::mod::prefork':
-      	    startservers => '5',
+      	    startservers => 5,
       }
 
       class { 'apache::mod::ssl':
@@ -51,13 +51,13 @@ class webserver(
     firewall { '110 http 80':
         dport   => '80',
         proto  => 'tcp',
-        action => 'accept',
+        jump => 'accept',
     }
 
     firewall { '110 http 443':
         dport   => '443',
         proto  => 'tcp',
-        action => 'accept',
+        jump => 'accept',
     }
 
     package { 'php-sqlite3':
@@ -75,7 +75,7 @@ class webserver(
     apache::vhost { "default_catch:80":
       priority   => '01',
       vhost_name => '_default_',
-      port       => '80',
+      port       => 80,
       options    => ['None'],
       override   => ['None'],
       docroot => "/var/www/html",
@@ -93,7 +93,7 @@ class webserver(
     apache::vhost { "default_catch:443":
       priority   => '01',
       vhost_name => '_default_',
-      port       => '443',
+      port       => 443,
       options    => ['None'],
       override   => ['None'],
       docroot => "/var/www/html",

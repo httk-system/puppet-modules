@@ -16,11 +16,19 @@ class resolved(
         enable     => true,
     }
 
-    firewall { '105 resolved':
+    firewall { '105 resolved udp':
         dport   => "53",
-        proto  => ['udp','tcp'],
+        proto  => 'udp',
 	ctstate => ['NEW','ESTABLISHED','RELATED'],
-        action => 'accept',
+        jump => 'accept',
     }
+
+    firewall { '105 resolved tcp':
+        dport   => "53",
+        proto  => 'tcp',
+	ctstate => ['NEW','ESTABLISHED','RELATED'],
+        jump => 'accept',
+    }
+
 
 }
