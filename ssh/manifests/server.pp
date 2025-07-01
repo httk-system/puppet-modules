@@ -60,6 +60,7 @@ class ssh::server(
 	    whitelist => $fail2ban_exclude,
           }
         }
+      }
 
       file {
         '/usr/control/fail2ban-unban':
