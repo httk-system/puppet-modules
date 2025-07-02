@@ -28,18 +28,27 @@ class ssh::server(
         dport   => "$port",
         proto  => 'tcp',
 	ctstate => ['NEW','ESTABLISHED','RELATED'],
-        action => 'accept',
+        jump => 'accept',
     }
 
     if $fail2ban {
 
-      case $::lsbdistcodename {
+      case $facts['os']['distro']['codename'] {
+        'nobel': {
+          class { 'fail2ban':
+            package_ensure => 'latest',
+            email => 'root@localhost',
+            action => 'action_',
+	    config_file_template => "fail2ban/Ubuntu/24.04/etc/fail2ban/jail.conf.epp",
+	    whitelist => $fail2ban_exclude,
+          }	 
+	}
         'jammy': {
           class { 'fail2ban':
             package_ensure => 'latest',
             email => 'root@localhost',
             action => 'action_',
-  	    config_file_template => "fail2ban/Ubuntu/20.04/etc/fail2ban/jail.conf.epp",
+	    config_file_template => "fail2ban/Ubuntu/22.04/etc/fail2ban/jail.conf.epp",
 	    whitelist => $fail2ban_exclude,
           }	 
 	}

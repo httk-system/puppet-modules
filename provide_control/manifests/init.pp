@@ -21,6 +21,14 @@ class provide_control() {
     require => File['/usr/control'],
   }
 
+  # Without this, the default /etc/bash.bashrc prints out "-bash: : No such file or directory" on every login if /etc/bash.bashrc.d is empty
+  file { '/etc/bash.bashrc.d/puppet_dummy.sh':
+    ensure  => 'present',
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+  }
+
   file { '/etc/profile.d/puppet-setups-control.sh':
     ensure  => 'present',
     owner   => 'root',
@@ -28,6 +36,14 @@ class provide_control() {
     mode    => '0644',
     source  => 'puppet:///modules/provide_control/etc-profile.d-puppet-setups-control.sh',
     require => File['/usr/control'],
+  }
+
+  file { '/etc/profile.d/puppet-bashrc.sh':
+    ensure  => 'present',
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    source  => 'puppet:///modules/provide_control/etc-profile.d-puppet-bashrc.sh',
   }
 
   file { '/etc/sudoers.d/control_set_default_path':
