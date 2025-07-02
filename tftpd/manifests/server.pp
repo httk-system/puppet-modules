@@ -24,7 +24,7 @@ class tftpd::server(
         dport   => "69",
         proto  => 'udp',
 	ctstate => ['NEW','ESTABLISHED','RELATED'],
-        action => 'accept',
+        jump => 'accept',
     }
 
 }
