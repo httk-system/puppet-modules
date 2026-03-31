@@ -10,9 +10,6 @@ class webserver(
             #}),
       }
 
-      class { 'apache::mod::wsgi':
-      }
-
       class { 'apache::mod::prefork':
       	    startservers => 5,
       }
