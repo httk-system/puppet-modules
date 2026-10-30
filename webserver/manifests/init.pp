@@ -21,29 +21,29 @@ class webserver(
       class { 'apache::mod::rewrite':
       }
 
-      if ! $php_version {
-        case $::lsbdistcodename {
-          'focal': {
-            class { 'apache::mod::php':
-              php_version => '7.4'
-            }
-          }
-          'jammy': {
-            class { 'apache::mod::php':
-              php_version => '8.1'
-            }
-          }
-          default: {
-            fail("Unsupported major of ${facts}['operatingsystem']")
-          }
-        }
-      } else {
-
-        class { 'apache::mod::php':
-          php_version => "$php_version"
-        }
-
-      }
+      #if ! $php_version {
+      #  case $::lsbdistcodename {
+      #    'focal': {
+      #      class { 'apache::mod::php':
+      #        php_version => '7.4'
+      #      }
+      #    }
+      #    'jammy': {
+      #      class { 'apache::mod::php':
+      #        php_version => '8.1'
+      #      }
+      #    }
+      #    default: {
+      #      fail("Unsupported major of ${facts}['operatingsystem']")
+      #    }
+      #  }
+      #} else {
+      # 
+      #  class { 'apache::mod::php':
+      #    php_version => "$php_version"
+      #  }
+      #
+      #}
 
     firewall { '110 http 80':
         dport   => '80',
@@ -57,10 +57,10 @@ class webserver(
         jump => 'accept',
     }
 
-    package { 'php-sqlite3':
-    	ensure => 'installed',
-	notify => Class['Apache::Service']
-    }
+    #package { 'php-sqlite3':
+    # 	ensure => 'installed',
+    #	notify => Class['Apache::Service']
+    #}
 
     /* Not needed, handled by apache module
     package { 'libapache2-mod-wsgi-py3':
